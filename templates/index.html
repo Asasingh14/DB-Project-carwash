@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="jumbotron bg-secondary text-white parallax">
+        <div class="container py-5">
+            <h1 class="display-4 animated fadeInDown">Welcome to Scrub-a-Dub-Dub Auto Scrub</h1>
+            <p class="lead animated fadeInDown">Experience top-notch service and care for your vehicle at our facility.</p>
+            <hr class="my-4 bg-light animated fadeInDown delay-1s">
+            <p class="animated fadeInDown delay-2s">We offer a range of services to cater to your car's specific needs. Let's make your car shine like never before.</p>
+            <!--TODO: Have to Change the url for booking back to services-->
+            <a class="btn btn-primary btn-lg animated fadeInDown delay-3s" href="{{ url_for('booking') }}" role="button">Learn more</a>
+        </div>
+    </div>
+
+    <div class="row text-center mt-5">
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white shadow animated fadeInUp">
+                <i class="fas fa-cog fa-3x mb-3"></i>
+                <div class="card-body">
+                    <h2 class="card-title">High Quality Service</h2>
+                    <p class="card-text">Our team is equipped with the skills and tools to ensure your car gets the treatment it deserves.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white shadow animated fadeInUp delay-1s">
+                <i class="fas fa-smile-beam fa-3x mb-3"></i>
+                <div class="card-body">
+                    <h2 class="card-title">Customer Satisfaction</h2>
+                    <p class="card-text">Your satisfaction is our priority. We won't stop until you're happy with our service.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white shadow animated fadeInUp delay-2s">
+                <i class="fas fa-leaf fa-3x mb-3"></i>
+                <div class="card-body">
+                    <h2 class="card-title">Environmentally Friendly</h2>
+                    <p class="card-text">We use eco-friendly products and methods. It's our way of giving back to the environment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include'static_hidden.html' %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+{% endblock %}

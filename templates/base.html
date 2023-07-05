@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scrub-a-Dub-Dub</title>
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico" >
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css" rel="stylesheet">
+
+    <style>
+        .navbar {
+            transition: 0.5s;
+            border-bottom: 2px solid #ff8300;
+        }
+        .navbar.scrolled {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        body {
+            padding-top: 70px; /* Adjust based on the height of your navbar */
+        }
+    </style>
+    <style>
+        #secretButton {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            background-color: transparent;
+            border: none;
+        }
+        #secretButton:hover {
+            background-color: transparent;
+        }
+        .modal-content {
+            background-color: #343a40;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            color: #fff;
+        }
+
+        .modal-header {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .modal-body {
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .modal-footer {
+            background-color: #343a40;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .modal-footer button {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .modal-footer button:hover {
+            background-color: #0056b3;
+        }
+
+
+
+    </style>
+</head>
+<body class="bg-dark text-white">
+
+{% include "navbar.html" %}
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <div class="alert alert-{{category}} alert-dismissible fade show" role="alert" style="margin: 20px 20px 20px 20px;">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="container mt-5">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-dark text-center">
+        <div class="container">
+            <span class="text-muted">© 2023 Scrub-a-Dub-Dub Auto Scrub All Rights Reserved.</span>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(window).scroll(function(){
+            $('nav').toggleClass('scrolled', $(this).scrollTop() > 50);
+        });
+    </script>
+    <!-- Secret Button -->
+    <script>
+        $(document).ready(function() {
+            var secretButton = $("#secretButton");
+            var secretPopup = new bootstrap.Modal(document.getElementById('secretPopup'));
+
+            secretButton.show(); // Show the secret button
+
+            setTimeout(function() {
+                secretButton.fadeIn(); // Fade in the secret button after 5 seconds
+            }, 5000);
+
+            secretButton.hover(function() {
+                $(this).fadeTo(200, 1); // On hover, make the button visible
+            }, function() {
+                $(this).fadeTo(200, 0); // On mouseout, make the button invisible again
+            });
+
+            secretButton.click(function() {
+                secretPopup.show(); // Show the secret popup when the button is clicked
+            });
+        });
+    </script>
+    <!-- Ends Here -->
+</body>
+</html>

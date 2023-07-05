@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Delete User</h1>
+    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}">
+        <p>Are you sure you want to delete user {{ user.username }}?</p>
+        <button type="submit" class="btn btn-danger">Delete User</button>
+    </form>
+</div>
+{% endblock %}

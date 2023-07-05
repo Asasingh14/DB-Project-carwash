@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card bg-dark text-white shadow-lg mt-5 animated fadeInDown">
+                <div class="card-header py-3">
+                    <h2 class="h4 text-uppercase text-center">Login</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('login') }}">
+                        <div class="form-group pb-4">
+                            <label for="email">Email:</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group pb-3">
+                            <label for="password">Password:</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-2">Login</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <small>Don't have an account? <a href="{{ url_for('register') }}" class="text-light">Register</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

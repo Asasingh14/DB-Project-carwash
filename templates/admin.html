@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="jumbotron bg-secondary text-white parallax">
+        <div class="container py-5">
+            <h1 class="display-4 animated fadeInDown">Welcome to the Admin Panel</h1>
+            <p class="lead animated fadeInDown">Here you can manage users, supplies, and bookings.</p>
+            <hr class="my-4 bg-light animated fadeInDown delay-1s">
+        </div>
+    </div>
+
+    <div class="row text-center mt-5">
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white shadow animated fadeInUp">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <div class="card-body">
+                    <h2 class="card-title">User Management</h2>
+                    <p class="card-text">Here you can manage all user related operations.</p>
+                    <a href="{{ url_for('manage_users') }}" class="btn btn-primary">Go to User Management</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white shadow animated fadeInUp delay-1s">
+                <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                <div class="card-body">
+                    <h2 class="card-title">Supplies Management</h2>
+                    <p class="card-text">Here you can manage all supplies related operations.</p>
+                    <a href="{{ url_for('manage_supplies') }}" class="btn btn-primary">Go to Supplies Management</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white shadow animated fadeInUp delay-2s">
+                <i class="fas fa-calendar-check fa-3x mb-3"></i>
+                <div class="card-body">
+                    <h2 class="card-title">Booking Management</h2>
+                    <p class="card-text">Here you can manage all booking related operations.</p>
+                    <a href="{{ url_for('manage_bookings') }}" class="btn btn-primary">Go to Booking Management</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+{% endblock %}

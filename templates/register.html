@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5">
+                <div class="card bg-dark text-white shadow-lg mt-5 animated fadeInDown">
+                    <div class="card-header py-3">
+                        <h2 class="h4 text-uppercase text-center">Register</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('register') }}">
+                            <div class="form-group pb-4">
+                                <label for="first_name">First Name:</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="form-group pb-4">
+                                <label for="last_name">Last Name:</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                            <div class="form-group pb-4">
+                                <label for="email">Email:</label>
+                                <input type="email" class="form-control {% if email_error %}is-invalid{% endif %}" id="email" name="email" required>
+                                {% if email_error %}
+                                <div class="invalid-feedback">
+                                    Invalid email format. Please use a valid email address!
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group pb-4">
+                                <label for="phone">Phone Number:</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                            <div class="form-group pb-4">
+                                <label for="password">Password:</label>
+                                <input type="password" class="form-control {% if password_error %}is-invalid{% endif %}" id="password" name="password" required>
+                                {% if password_error %}
+                                <div class="invalid-feedback">
+                                    Passwords do not match!
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group pb-2">
+                                <label for="confirm_password">Confirm Password:</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            </div>
+                            <div class="form-group pb-2">
+                                <label for="role">Role:</label>
+                                <select class="form-control" id="role" name="role">
+                                    <option>Customer</option>
+                                    <option>Employee</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mt-2">Register</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="display-2" style="color: #ffffff;">Manage Users</div>
+    {% if users %}
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Edit</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <th scope="row">{{ user['user_id'] }}</th>
+                        <td>{{ user['username'] }}</td>
+                        <td>{{ user['email'] }}</td>
+                        <td>{{ user['role'] }}</td>
+                        <td><a href="/edit-user/{{ user['user_id'] }}" class="btn btn-sm btn-primary">Edit</a></td>
+                        <td><a href="/delete-user/{{ user['user_id'] }}" class="btn btn-sm btn-danger">Delete</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="display-4" style="color: #ffffff;">No users found</div>
+    {% endif %}
+{% endblock %}
