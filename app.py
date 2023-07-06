@@ -111,20 +111,20 @@ def logout():
 @app.route('/admin')
 def admin():
     # Check if user is logged in and if the role is 'Employee'
-    # if 'user' in session and session['user']['role'] == 'Employee':
-    #     return render_template('admin.html')
-    # else:
-    #     return redirect(url_for('login'))  # or you might want to return 403 forbidden error
+    if 'user' in session and session['user']['role'] == 'Employee':
+        return render_template('admin.html')
+    else:
+        return redirect(url_for('login'))  # or you might want to return 403 forbidden error
     return render_template('admin.html')
 
 
 @app.route('/manage-users/')
 def manage_users():
-    # try:
-    #     username = session['username']
-    # except:
-    #     flash('Please sign in first', 'danger')
-    #     return redirect('/login')
+    try:
+        username = session['username']
+    except:
+        flash('Please sign in first', 'danger')
+        return redirect('/login')
 
     cur = mysql.connection.cursor()
     result_value = cur.execute("SELECT * FROM User")
