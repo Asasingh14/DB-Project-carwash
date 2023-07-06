@@ -89,32 +89,15 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <div class="flex-container">
-                <label class="display-4">4. Select a Membership Tier</label>
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <label class="btn btn-dark btn-lg">
-                        <input type="radio" name="membership" id="silver" value="Silver" autocomplete="off"> Silver
-                    </label>
-                    <label class="btn btn-dark btn-lg">
-                        <input type="radio" name="membership" id="gold" value="Gold" autocomplete="off"> Gold
-                    </label>
-                    <label class="btn btn-dark btn-lg">
-                        <input type="radio" name="membership" id="platinum" value="Platinum" autocomplete="off"> Platinum
-                    </label>
-                </div>
-            </div>
-        </div>
-
-{#        {% if not logged_in %}#}
-{#            <p class="text-center my-3">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>#}
-{#            <p class="text-center my-3">Or <a href="{{ url_for('register') }}">create an account</a> to book a service.</p>#}
-{#        {% else %}#}
+        {% if not logged_in %}
+            <p class="text-center my-3">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+            <p class="text-center my-3">Or <a href="{{ url_for('register') }}">create an account</a> to book a service.</p>
+        {% else %}
             <div class="text-center my-3">
                 <p>Total: <span id="total"></span></p>
                 <button type="submit" class="btn btn-primary btn-lg">Book</button>
             </div>
-{#        {% endif %}#}
+        {% endif %}
     </form>
 </div>
 

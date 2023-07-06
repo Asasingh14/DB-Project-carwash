@@ -5,25 +5,64 @@
     <h1 class="my-4">Create New User</h1>
     <form method="POST" action="{{ url_for('create_user') }}">
         <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" name="username" required>
+            <label for="first_name">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ first_name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" value = "{{ last_name }}" required>
         </div>
         <div class="form-group">
             <label for="email">Email address</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+            <input type="email" class="form-control" id="email" name="email" value = "{{ email }}" required>
+        </div>
+        <div class="form-group">
+            <label for="phone_no">Phone Number</label>
+            <input type="text" class="form-control" id="phone" name="phone" value = "{{ phone }}" required>
         </div>
         <div class="form-group">
             <label for="role">Role</label>
-            <select class="form-control" id="role" name="role">
-                <option>employee</option>
-                <option>customer</option>
+            <select class="form-control" id="role" name="role" onchange="checkRole(this.value)">
+                <option value="Customer">Customer</option>
+                <option value="Employee">Employee</option>
             </select>
+        </div>
+        <!-- Employee specific fields, initially hidden -->
+        <div id="employeeFields" style="display: none;">
+            <div class="form-group">
+                <label for="position">Position</label>
+                <input type="text" class="form-control" id="position" name="position" value = "{{ postion }}">
+            </div>
+            <div class="form-group">
+                <label for="team_id">Team ID</label>
+                <input type="number" class="form-control" id="team_id" name="team_id" value = "{{ team_id }}">
+            </div>
+            <div class="form-group">
+                <label for="salary">Salary</label>
+                <input type="number" step="0.01" class="form-control" id="salary" name="salary" value = "{{ salary }}">
+            </div>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
             <input type="password" class="form-control" id="password" name="password" required>
         </div>
+        <div class="form-group">
+            <label for="password">Confirm Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+        </div>
         <button type="submit" class="btn btn-primary">Create User</button>
     </form>
 </div>
+
+<script>
+    function checkRole(role) {
+        var employeeFields = document.getElementById('employeeFields');
+        if (role === 'Employee') {
+            employeeFields.style.display = 'block';
+        } else {
+            employeeFields.style.display = 'none';
+        }
+    }
+</script>
+
 {% endblock %}
