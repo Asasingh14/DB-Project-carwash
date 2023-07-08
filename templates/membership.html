@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="mb-5">
+                    <h1 class="mb-4">Membership Details</h1>
+                    {% if is_member %}
+                        <div class="mb-3">
+                            <label><strong>Name:</strong></label>
+                            <p>{{ data.name }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label><strong>Membership Tier:</strong></label>
+                            <p>{{ data.tier }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label><strong>Start Date:</strong></label>
+                            <p>{{ data.start_date }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label><strong>End Date:</strong></label>
+                            <p>{{ data.end_date }}</p>
+                        </div>
+                    {% else %}
+                        <p>You are not a member yet. Select a membership to join:</p>
+                        <form method="POST">
+                            <div class="form-group mb-3">
+                                <label for="membership_tier">Membership Tier</label>
+                                <select class="form-control" id="membership_tier" name="membership_tier">
+                                    {% for membership in available_memberships %}
+                                        <option value="{{ membership.tier }}">{{ membership.tier }} ({{ membership.price }} USD/year, {{ membership.discount }}% discount)</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="start_date">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="end_date">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date">
+                            </div>
+                            <button type="submit" class="btn btn-primary mb-3">Submit</button>
+                        </form>
+                        {% if login_required %}
+                            <p>You need to <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">register</a> to join a membership.</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

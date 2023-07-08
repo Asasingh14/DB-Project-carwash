@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session
+from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from mysql.connector.errors import IntegrityError
 from datetime import datetime, timedelta
@@ -99,6 +99,11 @@ def login():
             return render_template('login.html', email=email)
     return render_template('login.html')
 
+@app.context_processor
+def inject_user():
+    if 'user' in session:
+        return {'user': session['user']}
+    return {'user': None}
 
 
 @app.route('/logout')
@@ -120,12 +125,9 @@ def admin():
 
 @app.route('/manage-users/')
 def manage_users():
-    try:
-        username = session['username']
-    except:
+    if 'user' in session and session['user']['role'] == 'Customer':
         flash('Please sign in first', 'danger')
         return redirect('/login')
-
     cur = mysql.connection.cursor()
     result_value = cur.execute("SELECT * FROM User")
     if result_value > 0:
@@ -133,6 +135,7 @@ def manage_users():
         return render_template('manage-users.html', users=users)
     else:
         return render_template('manage-users.html', users=None)
+
 
 
 @app.route('/create-user', methods=['POST', 'GET'])
@@ -200,7 +203,6 @@ def edit_user(id):
         # username = request.form['username']
         email = request.form['email']
         role = request.form['role']
-        # cur.execute(f"-- UPDATE users SET username= {username}', email = '{email}', role = '{role}' WHERE user_id = {id}")
         cur.execute(f"UPDATE users SET email = '{email}', role = '{role}' WHERE user_id = {id}")
         mysql.connection.commit()
         flash('User updated', 'success')
@@ -225,27 +227,187 @@ def delete_user(id):
     flash("The user is deleted", "success")
     return redirect('/manage-users')
 
-
-@app.route('/manage_supplies')
+@app.route('/supplies', methods=['GET', 'POST'])
 def manage_supplies():
-    # Retrieve supplies data from the 'supplies' table
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM Supplies")
-    supplies = cur.fetchall()
-    cur.close()
+    if request.method == 'POST':
+        details = request.form
+        name = details['name']
+        supplier_id = details['supplier_id']
+        used_for = details['used_for']
+        price = details['price']
+        quantity = details['quantity']
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO Supplies(name, supplier_id, used_for, price, quantity) VALUES (%s, %s, %s, %s, %s)", (name, supplier_id, used_for, price, quantity))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('manage_supplies'))
 
-    return render_template('manage-supplies.html', supplies=supplies)
+    cur = mysql.connection.cursor()
+    result_value = cur.execute("SELECT Supplies.name, Supplies.price, Supplies.quantity, Supplier.company FROM Supplies INNER JOIN Supplier ON Supplies.supplier_id = Supplier.supplier_id")
+    if result_value > 0:
+        suppliers_details = cur.fetchall()
+        print(suppliers_details)
+        return render_template('manage-supplies.html', suppliers_details=suppliers_details)
+
+@app.route('/delete_supplier/<string:id>', methods = ['POST','GET'])
+def delete_supplier(id):
+    flash("Record Has Been Deleted Successfully")
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM Supplier WHERE supplier_id=%s", (id,))
+    mysql.connection.commit()
+    return redirect(url_for('manage_supplies'))
+
+@app.route('/add_supplier', methods=['GET', 'POST'])
+def add_supplier():
+    if request.method == 'POST':
+        details = request.form
+        company = details['company']
+        contact_no = details['contact_no']
+        email = details['email']
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO Supplier(company, contact_no, email) VALUES (%s, %s, %s)", (company, contact_no, email))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('manage_supplies'))
+    return render_template('add_supplier.html')
+
+@app.route('/order_supplies/<string:id>', methods = ['POST','GET'])
+def order_supplies(id):
+    if request.method == 'POST':
+        quantity = request.form['quantity']
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE Supplies SET quantity=quantity+%s WHERE supplies_id=%s", (quantity, id))
+        mysql.connection.commit()
+        flash("Data Updated Successfully")
+        return redirect(url_for('manage_supplies'))
+    return render_template('order_supplies.html')
+
 
 
 @app.route('/manage_bookings')
 def manage_bookings():
-    # Retrieve booking data from the 'bookings' table
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM bookings")
-    bookings = cur.fetchall()
-    cur.close()
+    # Check if user is logged in and if the role is 'Employee'
+    if 'user' not in session or session['user']['role'] != 'Employee':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('login'))
 
-    return render_template('manage-bookings.html', bookings=bookings)
+    # Initialize cursor
+    cur = mysql.connection.cursor()
+
+    try:
+        # # Execute the query
+        # cur.execute("SELECT * FROM bookings")
+
+        cur.execute("""
+            SELECT bookings.booking_id, bookings.time, bookings.status, customers.email, customers.name, packages.package_name 
+            FROM bookings 
+            INNER JOIN customers ON bookings.customer_id = customers.customer_id 
+            INNER JOIN packages ON bookings.package_id = packages.package_id
+        """)
+
+        # Fetch all rows
+        bookings = cur.fetchall()
+
+        # If no bookings found, show a message
+        if not bookings:
+            flash("No bookings found", "info")
+            return render_template('manage-bookings.html', bookings=None)
+
+        return render_template('manage-bookings.html', bookings=bookings)
+
+    except Exception as e:
+        # An error occurred while fetching data from the database
+        print(f"An error occurred: {e}")
+        flash("An error occurred while fetching bookings.", "danger")
+        return render_template('manage-bookings.html', bookings=None)
+
+    finally:
+        # Close the cursor
+        cur.close()
+
+@app.route('/update-booking/<int:id>/', methods=['GET', 'POST'])
+def update_booking(id):
+    # Check if user is logged in and if the role is 'Employee'
+    if 'user' not in session or session['user']['role'] != 'Employee':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('login'))
+
+    cur = mysql.connection.cursor()
+
+    try:
+        if request.method == 'POST':
+            # Collect form data here
+            # Assuming the form contains fields 'date', 'time', 'status'
+            date = request.form.get('date')
+            time = request.form.get('time')
+            status = request.form.get('status')
+
+            # Update the booking in the database
+            cur.execute(
+                f"UPDATE bookings SET date = '{date}', time = '{time}', status = '{status}' WHERE booking_id = {id}")
+            mysql.connection.commit()
+
+            flash('Booking updated successfully!', 'success')
+            return redirect(url_for('manage_bookings'))
+        else:
+            # In the case of GET, we retrieve the booking info and display it in the form
+            cur.execute(f"SELECT * FROM bookings WHERE booking_id = {id}")
+            booking = cur.fetchone()
+
+            if not booking:
+                flash('No booking found with this ID', 'danger')
+                return redirect(url_for('manage_bookings'))
+
+            return render_template('edit-booking.html', booking=booking)
+
+    except Exception as e:
+        # An error occurred while updating the booking
+        print(f"An error occurred: {e}")
+        flash("An error occurred while updating the booking.", "danger")
+        return redirect(url_for('manage_bookings'))
+
+    finally:
+        # Close the cursor
+        cur.close()
+
+
+@app.route('/bookings/verify', methods=['POST'])
+def verify_booking():
+    booking_id = request.form.get('booking_id')
+    employee_id = session.get('employee_id')  # Assuming you stored logged-in employee's id in the session
+    cur = mysql.connection.cursor()
+    cur.execute("UPDATE bookings SET verified_by=%s WHERE booking_id=%s", (employee_id, booking_id))
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for('manage_bookings'))
+
+
+@app.route('/delete-booking/<int:id>/')
+def delete_booking(id):
+    # Check if user is logged in and if the role is 'Employee'
+    if 'user' not in session or session['user']['role'] != 'Employee':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('login'))
+
+    cur = mysql.connection.cursor()
+
+    try:
+        # Execute delete query
+        cur.execute(f"DELETE FROM bookings WHERE booking_id = {id}")
+        mysql.connection.commit()
+
+        flash('Booking deleted successfully!', 'success')
+
+    except Exception as e:
+        # An error occurred while deleting the booking
+        print(f"An error occurred: {e}")
+        flash("An error occurred while deleting the booking.", "danger")
+
+    finally:
+        # Close the cursor
+        cur.close()
+
+    return redirect(url_for('manage_bookings'))
 
 
 @app.route('/booking', methods=['GET', 'POST'])
@@ -276,6 +438,51 @@ def booking():
         return render_template('booking.html', dates=next_seven_days, hours=hours)
 
     return redirect(url_for('home'))
+
+
+@app.route('/membership', methods=['GET', 'POST'])
+def handle_membership():
+    cur = mysql.connection.cursor()
+    if 'user' in session:  # User is logged in
+        if request.method == 'POST':
+            # Extract data from request
+            tier = request.form.get('membership_tier')
+            start_date = request.form.get('start_date')
+            end_date = request.form.get('end_date')
+
+            # Create a new Membership record
+            cur.execute("INSERT INTO Membership (username, tier, start_date, end_date) VALUES (%s, %s, %s, %s)",
+                        (session['user'], tier, start_date, end_date,))
+            mysql.connection.commit()
+
+            return redirect(url_for('handle_membership'))  # Redirect to GET request handler
+
+        else:
+            # Fetch user's membership details
+            result = cur.execute("""
+                SELECT User.email, Customer.member_id, Membership.*
+                FROM User
+                INNER JOIN Customer ON User.customer_id = Customer.customer_id
+                INNER JOIN Membership ON Customer.member_id = Membership.member_id
+                WHERE User.email = %s
+            """, (session['user'],))
+
+            print(result)
+            if result > 0:  # User is a member
+                membership = cur.fetchone()
+                return render_template('membership.html', is_member=True, data=membership)
+
+            else:  # User is not a member
+                cur.execute("SELECT * FROM Membership_Tier")
+                memberships = cur.fetchall()
+                return render_template('membership.html', is_member=False, available_memberships=memberships)
+
+    else:  # User is not logged in
+        cur.execute("SELECT * FROM Membership_Tier")
+        memberships = cur.fetchall()
+        return render_template('membership.html', is_member=False, available_memberships=memberships, login_required=True)
+
+
 
 
 if __name__ == '__main__':

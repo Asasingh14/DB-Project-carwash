@@ -1,10 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <style>
+        .icon-size {
+            width: 64px;  /* adjust as needed */
+            height: 64px; /* adjust as needed */
+        }
+    </style>
+
     <div class="jumbotron bg-secondary text-white parallax">
         <div class="container py-5">
-            <h1 class="display-4 animated fadeInDown">Welcome to the Admin Panel</h1>
-            <p class="lead animated fadeInDown">Here you can manage users, supplies, and bookings.</p>
+            {% if user %}
+                <h1 class="display-4 animated fadeInDown">Welcome, {{ user.first_name }}</h1>
+            {% endif %}
+            <p class="lead animated fadeInDown">This is your dashboard for managing the Scrub-a-Dub-Dub Auto Scrub facility.</p>
             <hr class="my-4 bg-light animated fadeInDown delay-1s">
         </div>
     </div>
@@ -12,31 +21,39 @@
     <div class="row text-center mt-5">
         <div class="col-lg-4">
             <div class="card bg-dark text-white shadow animated fadeInUp">
-                <i class="fas fa-users fa-3x mb-3"></i>
+                <div class="d-flex justify-content-center">
+                    <img src="/static/booking.png" class="icon-size mb-3">
+                </div>
                 <div class="card-body">
-                    <h2 class="card-title">User Management</h2>
-                    <p class="card-text">Here you can manage all user related operations.</p>
-                    <a href="{{ url_for('manage_users') }}" class="btn btn-primary">Go to User Management</a>
+                    <h2 class="card-title">Booking Management</h2>
+                    <p class="card-text">Track and manage all customer bookings here.</p>
+                    <a href="{{ url_for('manage_bookings') }}" class="btn btn-primary">Manage Bookings</a>
                 </div>
             </div>
         </div>
+
+
         <div class="col-lg-4">
             <div class="card bg-dark text-white shadow animated fadeInUp delay-1s">
-                <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                <div class="d-flex justify-content-center">
+                    <img src="/static/supplies.png" class="icon-size mb-3">
+                </div>
                 <div class="card-body">
                     <h2 class="card-title">Supplies Management</h2>
-                    <p class="card-text">Here you can manage all supplies related operations.</p>
-                    <a href="{{ url_for('manage_supplies') }}" class="btn btn-primary">Go to Supplies Management</a>
+                    <p class="card-text">Manage all the supplies and inventory for your facility.</p>
+                    <a href="{{ url_for('manage_supplies') }}" class="btn btn-primary">Manage Supplies</a>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card bg-dark text-white shadow animated fadeInUp delay-2s">
-                <i class="fas fa-calendar-check fa-3x mb-3"></i>
+                <div class="d-flex justify-content-center">
+                    <img src="/static/management.png" class="icon-size mb-3">
+                </div>
                 <div class="card-body">
-                    <h2 class="card-title">Booking Management</h2>
-                    <p class="card-text">Here you can manage all booking related operations.</p>
-                    <a href="{{ url_for('manage_bookings') }}" class="btn btn-primary">Go to Booking Management</a>
+                    <h2 class="card-title">User Management</h2>
+                    <p class="card-text">Manage user roles, access rights, and view user activity.</p>
+                    <a href="{{ url_for('manage_users') }}" class="btn btn-primary">Manage Users</a>
                 </div>
             </div>
         </div>
