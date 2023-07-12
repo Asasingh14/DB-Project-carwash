@@ -1,3 +1,5 @@
+import decimal
+
 from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from mysql.connector.errors import IntegrityError
@@ -137,7 +139,6 @@ def manage_users():
         return render_template('manage-users.html', users=None)
 
 
-
 @app.route('/create-user', methods=['POST', 'GET'])
 def create_user():
     if request.method == 'POST':
@@ -145,6 +146,7 @@ def create_user():
         first_name = request.form['first_name'].capitalize()
         last_name = request.form['last_name'].capitalize()
         email = request.form['email']
+        print(len(email))
         phone = request.form['phone']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
@@ -166,22 +168,19 @@ def create_user():
 
         cur = mysql.connection.cursor()
         try:
-            args = [first_name, last_name, email, phone, hashed_password, role]
+            args = [first_name, last_name, email, hashed_password, phone]
 
             if role == 'Customer':
                 cur.callproc('InsertUserAndCustomer', args)
-            # TODO: Fix Employee parsing
             elif role == 'Employee':
                 position = request.form.get('position')
-                team_id = request.form.get('team_id')
-                salary = request.form.get('salary')
-
-                args += [position, team_id, salary]
+                salary = decimal.Decimal(request.form.get('salary'))
+                print(type(salary))
+                args += [position, salary]
                 print(args)
 
-                cur.callproc('InsertUserAndEmployee', args)
+                cur.callproc('insert_user_employee', args)
 
-            while cur.nextset(): pass
             mysql.connection.commit()
         except IntegrityError as e:
             flash('A database error occurred! Please check your input.', 'danger')
@@ -200,23 +199,55 @@ def create_user():
 def edit_user(id):
     if request.method == 'POST':
         cur = mysql.connection.cursor()
-        # username = request.form['username']
         email = request.form['email']
         role = request.form['role']
-        cur.execute(f"UPDATE users SET email = '{email}', role = '{role}' WHERE user_id = {id}")
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+
+        if role == 'Customer':
+                print(first_name, last_name, email)
+                cur.execute(
+                    f"UPDATE User SET email = '{email}',first_name = '{first_name}', last_name = '{last_name}' , customer_id = {id} WHERE customer_id = {id}")
+                cur.execute(f"UPDATE Customer SET first_name = '{first_name}', last_name = '{last_name}' WHERE customer_id = {id}")
+        elif role == 'Employee':
+            cur.execute(f"UPDATE User SET email = '{email}', employee_id = {id} WHERE employee_id = {id}")
+            if 'position' in request.form and 'team_id' in request.form and 'salary' in request.form and 'contact_no' in request.form:
+
+                position = request.form['position']
+                team_id = request.form['team_id']
+                salary = request.form['salary']
+                contact_no = request.form['contact_no']
+                cur.execute(
+                    f"UPDATE User SET email = '{email}',first_name = '{first_name}', last_name = '{last_name}', employee_id = {id} WHERE customer_id = {id}")
+                cur.execute(f"UPDATE Employee SET position = '{position}', team_id = {team_id}, salary = {salary}, contact_no = '{contact_no}' WHERE employee_id = {id}")
+
         mysql.connection.commit()
         flash('User updated', 'success')
         return redirect('/manage-users')
     else:
         cur = mysql.connection.cursor()
-        result_value = cur.execute(f"SELECT * FROM User WHERE user_id = {id}")
+        result_value = cur.execute(f"SELECT * FROM User WHERE customer_id = {id} OR employee_id = {id}")
+
         if result_value > 0:
             user = cur.fetchone()
             user_form = {}
-            # user_form['username'] = user['username']
+            user_form['first_name'] = user['first_name']
+            user_form['last_name'] = user['last_name']
             user_form['email'] = user['email']
             user_form['role'] = user['role']
+
+            if user['role'] == 'Employee':
+                cur.execute(f"SELECT * FROM Employee WHERE employee_id = {id}")
+                employee = cur.fetchone()
+                user_form['position'] = employee['position']
+                user_form['team_id'] = employee['team_id']
+                user_form['salary'] = employee['salary']
+                user_form['contact_no'] = employee['contact_no']
+
             return render_template('edit-user.html', user_form=user_form)
+        else:
+            flash('User not found', 'error')
+            return redirect('/manage-users')
 
 
 @app.route('/delete-user/<int:id>/')
@@ -243,13 +274,14 @@ def manage_supplies():
         return redirect(url_for('manage_supplies'))
 
     cur = mysql.connection.cursor()
-    result_value = cur.execute("SELECT Supplies.name, Supplies.price, Supplies.quantity, Supplier.company FROM Supplies INNER JOIN Supplier ON Supplies.supplier_id = Supplier.supplier_id")
+    result_value = cur.execute("SELECT Supplies.name, Supplies.price, Supplies.quantity, Supplier.company, Supplier.supplier_id FROM Supplies INNER JOIN Supplier ON Supplies.supplier_id = Supplier.supplier_id")
     if result_value > 0:
         suppliers_details = cur.fetchall()
         print(suppliers_details)
         return render_template('manage-supplies.html', suppliers_details=suppliers_details)
+    return render_template('manage-supplies.html', suppliers_details=None)
 
-@app.route('/delete_supplier/<string:id>', methods = ['POST','GET'])
+@app.route('/delete_supplier/<int:id>', methods=['POST', 'GET'])
 def delete_supplier(id):
     flash("Record Has Been Deleted Successfully")
     cur = mysql.connection.cursor()
@@ -257,21 +289,7 @@ def delete_supplier(id):
     mysql.connection.commit()
     return redirect(url_for('manage_supplies'))
 
-@app.route('/add_supplier', methods=['GET', 'POST'])
-def add_supplier():
-    if request.method == 'POST':
-        details = request.form
-        company = details['company']
-        contact_no = details['contact_no']
-        email = details['email']
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO Supplier(company, contact_no, email) VALUES (%s, %s, %s)", (company, contact_no, email))
-        mysql.connection.commit()
-        cur.close()
-        return redirect(url_for('manage_supplies'))
-    return render_template('add_supplier.html')
-
-@app.route('/order_supplies/<string:id>', methods = ['POST','GET'])
+@app.route('/order_supplies/<int:id>', methods=['POST', 'GET'])
 def order_supplies(id):
     if request.method == 'POST':
         quantity = request.form['quantity']
@@ -280,9 +298,7 @@ def order_supplies(id):
         mysql.connection.commit()
         flash("Data Updated Successfully")
         return redirect(url_for('manage_supplies'))
-    return render_template('order_supplies.html')
-
-
+    return render_template('order_supplies.html', id=id)
 
 @app.route('/manage_bookings')
 def manage_bookings():
@@ -299,10 +315,10 @@ def manage_bookings():
         # cur.execute("SELECT * FROM bookings")
 
         cur.execute("""
-            SELECT bookings.booking_id, bookings.time, bookings.status, customers.email, customers.name, packages.package_name 
-            FROM bookings 
-            INNER JOIN customers ON bookings.customer_id = customers.customer_id 
-            INNER JOIN packages ON bookings.package_id = packages.package_id
+            SELECT Booking.booking_id, Booking.time, Booking.status, Customer.first_name, Package.type 
+            FROM Booking 
+            INNER JOIN Customer ON Booking.customer_id = Customer.customer_id 
+            INNER JOIN Package ON Booking.package_id = Package.package_id
         """)
 
         # Fetch all rows
@@ -443,7 +459,7 @@ def booking():
 @app.route('/membership', methods=['GET', 'POST'])
 def handle_membership():
     cur = mysql.connection.cursor()
-    if 'user' in session:  # User is logged in
+    if 'user' in session:  # User is logged inr
         if request.method == 'POST':
             # Extract data from request
             tier = request.form.get('membership_tier')
@@ -467,7 +483,6 @@ def handle_membership():
                 WHERE User.email = %s
             """, (session['user'],))
 
-            print(result)
             if result > 0:  # User is a member
                 membership = cur.fetchone()
                 return render_template('membership.html', is_member=True, data=membership)
@@ -475,11 +490,13 @@ def handle_membership():
             else:  # User is not a member
                 cur.execute("SELECT * FROM Membership_Tier")
                 memberships = cur.fetchall()
+                print(memberships)
                 return render_template('membership.html', is_member=False, available_memberships=memberships)
 
     else:  # User is not logged in
         cur.execute("SELECT * FROM Membership_Tier")
         memberships = cur.fetchall()
+        print(memberships)
         return render_template('membership.html', is_member=False, available_memberships=memberships, login_required=True)
 
 

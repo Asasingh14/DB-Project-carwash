@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        {% if not logged_in %}
+        {% if user is none%}
             <p class="text-center my-3">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
             <p class="text-center my-3">Or <a href="{{ url_for('register') }}">create an account</a> to book a service.</p>
         {% else %}

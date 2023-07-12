@@ -30,7 +30,7 @@
                                 <label for="membership_tier">Membership Tier</label>
                                 <select class="form-control" id="membership_tier" name="membership_tier">
                                     {% for membership in available_memberships %}
-                                        <option value="{{ membership.tier }}">{{ membership.tier }} ({{ membership.price }} USD/year, {{ membership.discount }}% discount)</option>
+                                        <option value="{{ membership.tier }}">{{ membership.tier }} ({{ membership.price_year }} USD/year, {{ membership.discount*100 }}% discount)</option>
                                     {% endfor %}
                                 </select>
                             </div>

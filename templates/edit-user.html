@@ -1,22 +1,70 @@
+{#{% extends 'base.html' %}#}
+{#{% block content %}#}
+{#    <form action="" method="POST">#}
+{#        <div class="form-group">#}
+{#            <label for="first_name">First Name</label>#}
+{#            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user_form['first_name'] }}">#}
+{#        </div>#}
+{#        <div class="form-group">#}
+{#            <label for="last_name">Last Name</label>#}
+{#            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user_form['last_name'] }}">#}
+{#        </div>#}
+{#        <div class="form-group">#}
+{#            <label for="email">Email</label>#}
+{#            <input type="email" class="form-control" id="email" name="email" value="{{ user_form['email'] }}">#}
+{#        </div>#}
+{#        <div class="form-group">#}
+{#            <label for="role">Role</label>#}
+{#            <input type="text" class="form-control" id="role" name="role" value="{{ user_form['role'] }}">#}
+{#        </div>#}
+{#        <button type="submit" class="btn btn-primary">Update User</button>#}
+{#    </form>#}
+{#{% endblock %}#}
+
 {% extends 'base.html' %}
+
 {% block content %}
+    <h2>Edit User</h2>
     <form action="" method="POST">
         <div class="form-group">
-            <label for="username">First Name</label>
-            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user_form['first_name'] }}">
+            <label for="first_name">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user_form['first_name'] }}" required>
         </div>
         <div class="form-group">
-            <label for="username">Last Name</label>
-            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user_form['last_name'] }}">
+            <label for="last_name">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user_form['last_name'] }}" required>
         </div>
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ user_form['email'] }}">
+            <input type="email" class="form-control" id="email" name="email" value="{{ user_form['email'] }}" required>
         </div>
         <div class="form-group">
             <label for="role">Role</label>
-            <input type="text" class="form-control" id="role" name="role" value="{{ user_form['role'] }}">
+            <select class="form-control" id="role" name="role" required>
+                <option value="Customer" {% if user_form['role'] == 'Customer' %}selected{% endif %}>Customer</option>
+                <option value="Employee" {% if user_form['role'] == 'Employee' %}selected{% endif %}>Employee</option>
+            </select>
         </div>
+
+        {% if user_form['role'] == 'Employee' %}
+            <div class="form-group">
+                <label for="position">Position</label>
+                <input type="text" class="form-control" id="position" name="position" value="{{ user_form['position'] }}">
+            </div>
+            <div class="form-group">
+                <label for="team_id">Team ID</label>
+                <input type="number" class="form-control" id="team_id" name="team_id" value="{{ user_form['team_id'] }}">
+            </div>
+            <div class="form-group">
+                <label for="salary">Salary</label>
+                <input type="number" class="form-control" id="salary" name="salary" value="{{ user_form['salary'] }}">
+            </div>
+            <div class="form-group">
+                <label for="contact_no">Contact Number</label>
+                <input type="text" class="form-control" id="contact_no" name="contact_no" value="{{ user_form['contact_no'] }}">
+            </div>
+        {% endif %}
+
         <button type="submit" class="btn btn-primary">Update User</button>
     </form>
 {% endblock %}

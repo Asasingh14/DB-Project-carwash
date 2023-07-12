@@ -1,8 +1,20 @@
-{% extends "base.html" %}
+{#{% extends "base.html" %}#}
+{#{% block content %}#}
+{#    <h1>Order Supplies</h1>#}
+{#    <form method="POST">#}
+{#        <input type="number" placeholder="Quantity" name="quantity">#}
+{#        <input type="submit" value="Order Supplies">#}
+{#    </form>#}
+{#{% endblock %}#}
+{% extends 'base.html' %}
+
 {% block content %}
-    <h1>Order Supplies</h1>
-    <form method="POST">
-        <input type="number" placeholder="Quantity" name="quantity">
-        <input type="submit" value="Order Supplies">
+    <h2>Order Supplies</h2>
+    <form action="" method="POST">
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Order</button>
     </form>
 {% endblock %}
