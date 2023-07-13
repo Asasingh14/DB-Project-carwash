@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">Package Details</h1>
+                    {% if has_package %}
+                        <div class="mb-3">
+                            <label class="fw-bold">Small Wash Left:</label>
+                            <p>{{ package.small_wash_left }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Small Wax Left:</label>
+                            <p>{{ package.small_wax_left }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Big Wash Left:</label>
+                            <p>{{ package.big_wash_left }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Big Wax Left:</label>
+                            <p>{{ package.big_wax_left }}</p>
+                        </div>
+                    {% else %}
+                        <p class="mb-4">You do not have a package yet. Select a package type to purchase:</p>
+                        <div class="text-center">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Package ID</th>
+                                        <th>Price (Small Car)</th>
+                                        <th>Price (Big Car)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for package in available_packages %}
+                                        <tr>
+                                            <td>{{ package.package_id }}</td>
+                                            <td>{{ package.price_s }}</td>
+                                            <td>{{ package.price_b }}</td>
+                                            <td>
+                                                <form method="POST" class="d-inline-block">
+                                                    <input type="hidden" name="package_id" value="{{ package.package_id }}">
+                                                    <input type="hidden" name="car_size" value="Small">
+                                                    <button type="submit" class="btn btn-primary btn-sm">Small</button>
+                                                </form>
+                                                <form method="POST" class="d-inline-block">
+                                                    <input type="hidden" name="package_id" value="{{ package.package_id }}">
+                                                    <input type="hidden" name="car_size" value="Big">
+                                                    <button type="submit" class="btn btn-primary btn-sm">Big</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if not user %}
+                            <p class="mt-3">You need to <a href="{{ url_for('login') }}">log in</a> or <a href="{{ url_for('register') }}">register</a> to purchase a package.</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

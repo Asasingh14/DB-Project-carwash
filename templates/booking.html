@@ -5,10 +5,8 @@
     <h1 class="text-center my-5">Book a Service</h1>
     <form method="POST" action="{{ url_for('booking') }}">
     <input type="hidden" id="vehicleType-label" name="vehicleType-label" value="">
-    <input type="hidden" id="package-label" name="package-label" value="">
-    <input type="hidden" id="membership-label" name="membership-label" value="">
+    <input type="hidden" id="service-label" name="package-label" value="">
     <input type="hidden" id="selected-time" name="selected-time">
-    <!-- Include this hidden field inside your form -->
         <style>
             .btn-xl {
                 padding: 20px 40px;
@@ -46,24 +44,26 @@
             <label class="display-4">1. Select Vehicle Type</label>
             <div class="btn-group btn-group-toggle d-flex justify-content-center" data-toggle="buttons">
                 <label class="btn btn-dark btn-xl m-2">
-                    <input type="radio" name="vehicleType" id="small" value="Small Car" autocomplete="off"> Small Car
+                    <input type="radio" name="vehicleType" id="small" value="Small" autocomplete="off"> Small Car
                 </label>
                 <label class="btn btn-dark btn-xl m-2">
-                    <input type="radio" name="vehicleType" id="large" value="Large Car" autocomplete="off"> Large Car
+                    <input type="radio" name="vehicleType" id="big" value="Big" autocomplete="off"> Large Car
                 </label>
             </div>
         </div>
 
-
         <div class="form-group">
             <div class="flex-container">
-                <label class="display-4">2. Select a Package</label>
+                <label class="display-4">2. Select a Service</label>
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-dark btn-lg">
-                        <input type="radio" name="package" id="package1" value="Package 1" autocomplete="off"> Package 1
+                        <input type="radio" name="service" id="Wax" value="Wash" autocomplete="off"> Wash
                     </label>
                     <label class="btn btn-dark btn-lg">
-                        <input type="radio" name="package" id="package2" value="Package 2" autocomplete="off"> Package 2
+                        <input type="radio" name="service" id="Wax" value="Wax" autocomplete="off"> Wax
+                    </label>
+                    <label class="btn btn-dark btn-lg">
+                        <input type="radio" name="service" id="Both" value="Both" autocomplete="off"> Both
                     </label>
                 </div>
             </div>
@@ -79,7 +79,12 @@
                                 <h5 class="card-title">{{ date.strftime('%Y-%m-%d') }}</h5>
                                 <div class="time-group">
                                     {% for hour in hours %}
-                                        <button class="btn btn-dark btn-block mb-2" type="button" value="{{ date.strftime('%Y-%m-%d') }} {{ hour }}">{{ hour }}</button>
+                                        {% set time_slot = date.strftime('%Y-%m-%d') ~ ' ' ~ hour %}
+                                        {% if bookings.get(time_slot, 0) >= 1 %}
+                                            <button class="btn btn-danger btn-block mb-2" type="button" value="{{ time_slot }}" disabled>{{ hour }}</button>
+                                        {% else %}
+                                            <button class="btn btn-dark btn-block mb-2" type="button" value="{{ time_slot }}">{{ hour }}</button>
+                                        {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>
@@ -116,6 +121,5 @@
         });
     });
 </script>
-
 
 {% endblock %}

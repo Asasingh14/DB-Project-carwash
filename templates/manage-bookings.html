@@ -10,7 +10,7 @@
                 <th>Time</th>
                 <th>Customer Name</th>
                 <th>Customer Email</th>
-                <th>Package Name</th>
+                <th>Service</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -23,20 +23,17 @@
                     <td>{{ booking.time }}</td>
                     <td>{{ booking.name }}</td> <!-- name -->
                     <td>{{ booking.email }}</td> <!-- email -->
-                    <td>{{ booking.package_name }}</td> <!-- package_name -->
+                    <td>{{ booking.service }}</td> <!-- package_name -->
                     <td>{{ booking.status }}</td>
                     <td>
-                        <form action="/bookings/update" method="post" class="d-inline-block">
+                        {% if booking.status == 'Pending' %}
+                        <form action="/bookings/verify" method="POST" class="d-inline-block">
                             <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
-                            <input type="submit" value="Update" class="btn btn-primary">
+                            <button type="submit" class="btn btn-sm btn-primary">Verify</button>
                         </form>
-                        <form action="/bookings/delete" method="post" class="d-inline-block">
-                            <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
-                            <input type="submit" value="Delete" class="btn btn-danger">
-                        </form>
-                        <form action="/bookings/verify" method="post" class="d-inline-block">
-                            <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
-                            <input type="submit" value="Verify" class="btn btn-success">
+                        {% endif %}
+                        <form action="/delete-booking/{{ booking.booking_id }}/" method="POST" class="d-inline-block">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -50,3 +47,4 @@
     </table>
 </div>
 {% endblock %}
+
