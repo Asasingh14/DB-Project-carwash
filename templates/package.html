@@ -31,8 +31,10 @@
                                 <thead>
                                     <tr>
                                         <th>Package ID</th>
+                                        <th>Service Type</th>
                                         <th>Price (Small Car)</th>
                                         <th>Price (Big Car)</th>
+                                        <th>Quantity</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -40,8 +42,10 @@
                                     {% for package in available_packages %}
                                         <tr>
                                             <td>{{ package.package_id }}</td>
+                                            <td>{{ package.type }}</td>
                                             <td>{{ package.price_s }}</td>
                                             <td>{{ package.price_b }}</td>
+                                            <td>{{ package.quantity }}</td>
                                             <td>
                                                 <form method="POST" class="d-inline-block">
                                                     <input type="hidden" name="package_id" value="{{ package.package_id }}">

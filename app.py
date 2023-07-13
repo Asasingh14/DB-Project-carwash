@@ -148,7 +148,6 @@ def create_user():
         first_name = request.form['first_name'].capitalize()
         last_name = request.form['last_name'].capitalize()
         email = request.form['email']
-        print(len(email))
         phone = request.form['phone']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
@@ -171,16 +170,13 @@ def create_user():
         cur = mysql.connection.cursor()
         try:
             args = [first_name, last_name, email, hashed_password, phone]
-            print(args)
 
             if role == 'Customer':
                 cur.callproc('InsertUserAndCustomer', args)
             elif role == 'Employee':
                 position = request.form.get('position')
                 salary = decimal.Decimal(request.form.get('salary'))
-                print(type(salary))
                 args += [position, salary]
-                print(args)
 
                 cur.callproc('insert_user_employee', args)
 
@@ -377,6 +373,61 @@ def booking():
     return redirect(url_for('home'))
 
 
+# @app.route('/membership', methods=['GET', 'POST'])
+# def handle_membership():
+#     cur = mysql.connection.cursor()
+#
+#     if request.method == 'POST':
+#         # Extract data from request
+#         tier = request.form.get('membership_tier')
+#         user_id = session['user']['customer_id']
+#
+#         # Create a new membership using the create_membership procedure
+#         cur.callproc('create_membership', (user_id, tier))
+#         mysql.connection.commit()
+#
+#         return redirect(url_for('handle_membership'))  # Redirect to GET request handler
+#
+#     else:
+#         if session['user']:
+#             result = cur.execute("""
+#                 SELECT User.email, Customer.member_id, Customer.member_start, Customer.member_end, Membership.*, Membership_Tier.discount
+#                 FROM User
+#                 INNER JOIN Customer ON User.customer_id = Customer.customer_id
+#                 INNER JOIN Membership ON Customer.member_id = Membership.member_id
+#                 INNER JOIN Membership_Tier ON Membership_Tier.tier = Membership.tier
+#                 WHERE User.email = %s
+#             """, (session['user']['email'],))
+#
+#             if result > 0:  # User is a member
+#                 membership = cur.fetchone()
+#                 discount_decimal = membership['discount']
+#                 discount_percentage = '{:.0%}'.format(discount_decimal)
+#                 membership['discount'] = discount_percentage
+#                 print(membership)
+#
+#                 return render_template('membership.html', is_member=True, data=membership)
+#
+#             else:  # User is not a member
+#                 cur.execute("SELECT * FROM Membership_Tier")
+#                 memberships = cur.fetchall()
+#
+#                 for membership in memberships:
+#                     discount_decimal = membership['discount']
+#                     discount_percentage = '{:.0%}'.format(discount_decimal)
+#                     membership['discount'] = discount_percentage
+#
+#                 return render_template('membership.html', is_member=False, available_memberships=memberships)
+#         else:
+#             cur.execute("SELECT * FROM Membership_Tier")
+#             memberships = cur.fetchall()
+#
+#             for membership in memberships:
+#                 discount_decimal = membership['discount']
+#                 discount_percentage = '{:.0%}'.format(discount_decimal)
+#                 membership['discount'] = discount_percentage
+#
+#             return render_template('membership.html', is_member=False, available_memberships=memberships)
 @app.route('/membership', methods=['GET', 'POST'])
 def handle_membership():
     cur = mysql.connection.cursor()
@@ -393,9 +444,9 @@ def handle_membership():
         return redirect(url_for('handle_membership'))  # Redirect to GET request handler
 
     else:
-        if session['user']:
+        if session.get('user'):
             result = cur.execute("""
-                SELECT User.email, Customer.member_id,Customer.member_start, Customer.member_end, Membership.*, Membership_Tier.discount
+                SELECT User.email, Customer.member_id, Customer.member_start, Customer.member_end, Membership.*, Membership_Tier.discount, Membership_Tier.price_year
                 FROM User
                 INNER JOIN Customer ON User.customer_id = Customer.customer_id
                 INNER JOIN Membership ON Customer.member_id = Membership.member_id
@@ -414,10 +465,22 @@ def handle_membership():
             else:  # User is not a member
                 cur.execute("SELECT * FROM Membership_Tier")
                 memberships = cur.fetchall()
+
+                for membership in memberships:
+                    discount_decimal = membership['discount']
+                    discount_percentage = '{:.0%}'.format(discount_decimal)
+                    membership['discount'] = discount_percentage
+
                 return render_template('membership.html', is_member=False, available_memberships=memberships)
         else:
             cur.execute("SELECT * FROM Membership_Tier")
             memberships = cur.fetchall()
+
+            for membership in memberships:
+                discount_decimal = membership['discount']
+                discount_percentage = '{:.0%}'.format(discount_decimal)
+                membership['discount'] = discount_percentage
+
             return render_template('membership.html', is_member=False, available_memberships=memberships)
 
 
