@@ -501,14 +501,18 @@ def handle_package():
         return redirect(url_for('handle_package'))  # Redirect to GET request handler
 
     else:
-        # Check if the user has a package
-        customer_id = session['user']['customer_id']
-        cur.execute("SELECT * FROM Customer_Package WHERE customer_id = %s", (customer_id,))
-        package = cur.fetchone()
+        if session.get('user'):
+            customer_id = session['user']['customer_id']
+            cur.execute("SELECT * FROM Customer_Package WHERE customer_id = %s", (customer_id,))
+            package = cur.fetchone()
 
-        if package:  # User has a package
-            return render_template('package.html', has_package=True, package=package)
-        else:  # User does not have a package
+            if package:  # User has a package
+                return render_template('package.html', has_package=True, package=package)
+            else:  # User does not have a package
+                cur.execute("SELECT * FROM Package")
+                available_packages = cur.fetchall()
+                return render_template('package.html', has_package=False, available_packages=available_packages)
+        else:
             cur.execute("SELECT * FROM Package")
             available_packages = cur.fetchall()
             return render_template('package.html', has_package=False, available_packages=available_packages)
