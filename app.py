@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify
+from flask import Flask, render_template, redirect, url_for, request, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from mysql.connector.errors import IntegrityError
 from datetime import datetime, timedelta
@@ -306,8 +306,8 @@ def verify_booking():
 @app.route('/delete-booking/<int:id>/', methods=['POST'])
 def delete_booking(id):
     # Check if user is logged in and if the role is 'Employee'
-    if 'user' not in session or session['user']['role'] != 'Employee':
-        flash('Unauthorized access.', 'danger')
+    if 'user' not in session:
+        flash('Please Login.', 'danger')
         return redirect(url_for('login'))
 
     cur = mysql.connection.cursor()
@@ -328,7 +328,10 @@ def delete_booking(id):
         # Close the cursor
         cur.close()
 
-    return redirect(url_for('manage_bookings'))
+    if session['user']['role'] == 'Employee':
+        return redirect(url_for('manage_bookings'))
+    else:
+        return redirect(url_for('view_bookings', c_id=session['user']['customer_id']))
 
 
 @app.route('/booking', methods=['GET', 'POST'])
@@ -373,61 +376,25 @@ def booking():
     return redirect(url_for('home'))
 
 
-# @app.route('/membership', methods=['GET', 'POST'])
-# def handle_membership():
-#     cur = mysql.connection.cursor()
-#
-#     if request.method == 'POST':
-#         # Extract data from request
-#         tier = request.form.get('membership_tier')
-#         user_id = session['user']['customer_id']
-#
-#         # Create a new membership using the create_membership procedure
-#         cur.callproc('create_membership', (user_id, tier))
-#         mysql.connection.commit()
-#
-#         return redirect(url_for('handle_membership'))  # Redirect to GET request handler
-#
-#     else:
-#         if session['user']:
-#             result = cur.execute("""
-#                 SELECT User.email, Customer.member_id, Customer.member_start, Customer.member_end, Membership.*, Membership_Tier.discount
-#                 FROM User
-#                 INNER JOIN Customer ON User.customer_id = Customer.customer_id
-#                 INNER JOIN Membership ON Customer.member_id = Membership.member_id
-#                 INNER JOIN Membership_Tier ON Membership_Tier.tier = Membership.tier
-#                 WHERE User.email = %s
-#             """, (session['user']['email'],))
-#
-#             if result > 0:  # User is a member
-#                 membership = cur.fetchone()
-#                 discount_decimal = membership['discount']
-#                 discount_percentage = '{:.0%}'.format(discount_decimal)
-#                 membership['discount'] = discount_percentage
-#                 print(membership)
-#
-#                 return render_template('membership.html', is_member=True, data=membership)
-#
-#             else:  # User is not a member
-#                 cur.execute("SELECT * FROM Membership_Tier")
-#                 memberships = cur.fetchall()
-#
-#                 for membership in memberships:
-#                     discount_decimal = membership['discount']
-#                     discount_percentage = '{:.0%}'.format(discount_decimal)
-#                     membership['discount'] = discount_percentage
-#
-#                 return render_template('membership.html', is_member=False, available_memberships=memberships)
-#         else:
-#             cur.execute("SELECT * FROM Membership_Tier")
-#             memberships = cur.fetchall()
-#
-#             for membership in memberships:
-#                 discount_decimal = membership['discount']
-#                 discount_percentage = '{:.0%}'.format(discount_decimal)
-#                 membership['discount'] = discount_percentage
-#
-#             return render_template('membership.html', is_member=False, available_memberships=memberships)
+@app.route('/view_bookings/<int:c_id>')
+def view_bookings(c_id):
+    if session['user']:
+        # Create a cursor
+        cur = mysql.connection.cursor()
+        # Execute the stored procedure
+        cur.callproc('view_bookings', [c_id])
+        # Fetch all the records
+        bookings = cur.fetchall()
+        # Close the connection
+        cur.close()
+        bookings = sorted(bookings, key=lambda x: x['time'])
+
+        # Return the result to a template or as JSON
+        return render_template('view_bookings.html', bookings=bookings)
+    else:
+        redirect(url_for('home'))
+
+
 @app.route('/membership', methods=['GET', 'POST'])
 def handle_membership():
     cur = mysql.connection.cursor()
@@ -505,7 +472,7 @@ def handle_package():
             customer_id = session['user']['customer_id']
             cur.execute("SELECT * FROM Customer_Package WHERE customer_id = %s", (customer_id,))
             package = cur.fetchone()
-
+            print(package)
             if package:  # User has a package
                 return render_template('package.html', has_package=True, package=package)
             else:  # User does not have a package

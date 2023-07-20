@@ -1,5 +1,4 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-transparent fixed-top">
-{#    <a class="navbar-brand animated lightSpeedIn" href="#">Car Wash</a>#}
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -25,6 +24,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('booking') }}">Booking</a>
                 </li>
+                {% if user %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_bookings', c_id=session['user']['customer_id']) }}">My Booking</a>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('handle_membership') }}">Membership</a>
                 </li>
